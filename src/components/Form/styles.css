@@ -1,0 +1,26 @@
+.input-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.input-group input {
+  height: 30px;
+  border-radius: 4px;
+  outline: none;
+  border: 1px solid #d5d5d5;
+  font-size: 14px;
+  padding: 0 5px;
+}
+.input-group label {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.input-group .color-picker {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.day-time {
+  display: flex;
+  justify-content: space-between;
+}

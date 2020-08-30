@@ -3,8 +3,8 @@ import moment from 'moment';
 
 import './styles.css';
 
-const Calendar = ({ onDayClick, onAddClick }) => {
-  const [date, setDate] = useState(moment());
+const Calendar = ({ reminders, onDayClick, onAddClick }) => {
+  const [date, setDate] = useState(moment(new Date()));
   const [currentMonth, setCurrentMonth] = useState(null);
 
   const weekDays = moment.weekdays().map((day) => (
@@ -13,24 +13,48 @@ const Calendar = ({ onDayClick, onAddClick }) => {
     </th>
   ));
 
-  const getMonthStart = () => date.startOf('month').format('d');
+  const getMonthStart = () => +moment(date).startOf('month').format('d');
+
+  const getCurrentDay = () => +date.format('D');
 
   const getDaysInMonth = () => {
-    let space = [];
+    let empty = [];
     for (let i = 0; i < getMonthStart(); i++)
-      space.push(<td key={`blank_${i}`} className="day blank" />);
+      empty.push(<td key={`blank_${i}`} className="day blank" />);
 
     let validDays = [];
     for (let day = 1; day <= date.daysInMonth(); day++) {
       const currentDate = moment(new Date(date.year(), date.month(), day));
+      const today = getCurrentDay() === day ? 'today' : '';
+      const texts = [];
 
+      reminders.forEach(({ date: itemDate, text, color }, index) => {
+        if (itemDate.format('YYYY-MM-DD') === currentDate.format('YYYY-MM-DD')) {
+          texts.push(
+            <div key={`text_${index}`}>
+              <span className="reminder-preview-color" style={{ backgroundColor: color }}></span>{' '}
+              {text}
+            </div>
+          );
+        }
+      });
       validDays.push(
-        <td key={day} className="day" onClick={() => onDayClick(currentDate)}>
+        <td
+          key={`day_${day}`}
+          className={`day ${today}`}
+          title={texts.length > 0 ? 'Click for details' : ''}
+          style={{ cursor: texts.length > 0 ? 'pointer' : 'initial' }}
+          onClick={() => onDayClick(currentDate)}
+        >
+          {texts.length > 0 && <div className="reminder-preview">{texts}</div>}
           <span>{day}</span>
           <button
             title="Add a reminder"
             className="calendar-btn"
-            onClick={() => onAddClick(currentDate)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddClick(currentDate);
+            }}
           >
             +
           </button>
@@ -38,7 +62,7 @@ const Calendar = ({ onDayClick, onAddClick }) => {
       );
     }
 
-    const total = [...space, ...validDays];
+    const total = [...empty, ...validDays];
     let days = [],
       weeks = [];
 
@@ -52,13 +76,13 @@ const Calendar = ({ onDayClick, onAddClick }) => {
 
       if (index === total.length - 1) weeks.push(days);
     });
-    
+
     return weeks.map((week, index) => <tr key={index}>{week}</tr>);
   };
 
   useEffect(() => {
     setCurrentMonth(getDaysInMonth());
-  }, [date]);
+  }, [date, reminders]);
 
   return (
     <div>

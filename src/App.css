@@ -41,3 +41,35 @@
     transform: rotate(360deg);
   }
 }
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-header span {
+  cursor: pointer;
+  font-size: 32px;
+}
+
+.modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  border-radius: 15px;
+  border: 1px solid var(--border-color);
+  padding: 20px 20px;
+  background: white;
+}
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}

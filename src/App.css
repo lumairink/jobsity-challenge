@@ -59,7 +59,7 @@
 }
 
 .modal {
-  position: relative;
+  position: fixed;
   display: flex;
   flex-direction: column;
   width: 360px;
@@ -67,6 +67,14 @@
   border: 1px solid var(--border-color);
   padding: 20px 20px;
   background: white;
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+}
+.modal:focus {
+  outline: none;
 }
 .modal-footer {
   display: flex;

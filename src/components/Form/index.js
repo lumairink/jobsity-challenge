@@ -12,14 +12,15 @@ const Form = ({ reminder = {}, onSubmit }) => {
   const validate = (values) => {
     let errors = {};
     if (!values.text || !values.time || !values.city) {
-      errors.emptyFields = true;
+      errors.emptyFields = 'All fields are required.';
     }
     if (values.text.length > 30) {
-      errors.max = true;
+      errors.max = 'Max 30 characters.';
     }
 
     return errors;
   };
+
   const formik = useFormik({
     initialValues: {
       ...(reminder.id ? reminder : { ...reminder, color: '#22194D', time: '', text: '' }),
@@ -40,7 +41,11 @@ const Form = ({ reminder = {}, onSubmit }) => {
             value={formik.values.text}
             onChange={(e) => formik.setFieldValue('text', e.target.value)}
           />
-          {formik.errors.max && <span style={{ color: 'red' }}>Max 30 characters</span>}
+          {formik.errors.max && (
+            <span data-testid="errors-max" style={{ color: 'red' }}>
+              {formik.errors.max}
+            </span>
+          )}
         </div>
         <div className={reminder.id ? 'day-time' : ''}>
           {reminder.id && (
@@ -92,7 +97,9 @@ const Form = ({ reminder = {}, onSubmit }) => {
           />
         </div>
         {formik.errors.emptyFields && (
-          <span style={{ color: 'red' }}>All fields are required.</span>
+          <span data-testid="errors-empty-fields" style={{ color: 'red' }}>
+            {formik.errors.emptyFields}
+          </span>
         )}
       </form>
       <div className="modal-footer">

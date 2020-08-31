@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import useModal from 'react-hooks-use-modal';
 import { useSelector, useDispatch } from 'react-redux';
 import moment from 'moment';
 import { v4 as uuid } from 'uuid';
+import ReactModal from 'react-modal';
 
 import Calendar from './components/Calendar';
 import Form from './components/Form';
@@ -19,26 +19,21 @@ function App() {
   const [reminder, setReminder] = useState();
   const [currentReminders, setCurrentReminders] = useState([]);
 
-  const [ListModal, openListModal, closeListModal, isOpen] = useModal('root', {
-    preventScroll: true,
-  });
-
-  const [AddModal, openAddModal, closeAddModal] = useModal('root', {
-    preventScroll: true,
-  });
+  const [openAddModal, setOpenAddModal] = useState(false);
+  const [openListModal, setOpenListModal] = useState(false);
 
   const handleDayClick = (currentDate) => {
     setDate(currentDate);
     const list = reminders.filter((reminder) => moment(reminder.date).isSame(currentDate, 'day'));
     if (list.length) {
       setCurrentReminders(list);
-      openListModal();
+      setOpenListModal(true);
     }
   };
 
   const handleAddClick = (date) => {
     setReminder({ date, day: date.format('D'), time: date.format('HH:mm') });
-    openAddModal();
+    setOpenAddModal(true);
   };
 
   const handleSubmit = (values) => {
@@ -57,13 +52,13 @@ function App() {
     } else {
       dispatch(Actions.saveReminder({ ...values, id: uuid() }));
     }
-    closeAddModal();
+    setOpenAddModal(false);
   };
 
   const handleEditClick = (item) => {
-    closeListModal();
+    setOpenListModal(false);
     setReminder({ ...item, time: item.time.toDate() });
-    openAddModal();
+    setOpenAddModal(true);
   };
 
   const handleDeleteClick = (id) => dispatch(Actions.deleteReminders(id));
@@ -71,9 +66,9 @@ function App() {
   const handleDeleteAllClick = (date) => dispatch(Actions.deleteAllReminders(date));
 
   useEffect(() => {
-    if (date && isOpen) {
+    if (date && openListModal) {
       const list = reminders.filter((reminder) => moment(reminder.date).isSame(date, 'day'));
-      if (!list.length) closeListModal();
+      if (!list.length) setOpenListModal(false);
       setCurrentReminders(list);
     }
   }, [reminders]);
@@ -81,11 +76,16 @@ function App() {
   return (
     <div className="App">
       <Calendar reminders={reminders} onAddClick={handleAddClick} onDayClick={handleDayClick} />
-      <ListModal key="listModal">
+      <ReactModal
+        key="listModal"
+        isOpen={openListModal}
+        onRequestClose={() => setOpenListModal(false)}
+        className="modal"
+      >
         <div className="modal">
           <div className="modal-header">
             <h2>Reminders</h2>
-            <span onClick={closeListModal}>&times;</span>
+            <span onClick={() => setOpenListModal(false)}>&times;</span>
           </div>
           <div>
             <RemindersList
@@ -96,18 +96,23 @@ function App() {
             />
           </div>
         </div>
-      </ListModal>
-      <AddModal key="addModal">
-        <div className="modal">
+      </ReactModal>
+      <ReactModal
+        key="addModal"
+        isOpen={openAddModal}
+        onRequestClose={() => setOpenAddModal(false)}
+        className="modal"
+      >
+        <div>
           <div className="modal-header">
             <h2>New reminder</h2>
-            <span onClick={closeAddModal}>&times;</span>
+            <span onClick={() => setOpenAddModal(false)}>&times;</span>
           </div>
           <div className="modal-body">
             <Form reminder={reminder} onSubmit={handleSubmit} />
           </div>
         </div>
-      </AddModal>
+      </ReactModal>
     </div>
   );
 }

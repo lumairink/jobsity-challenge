@@ -3,54 +3,41 @@ import '@testing-library/jest-dom';
 import { render, wait, waitForElement, queryByAttribute, fireEvent } from '@testing-library/react';
 import moment from 'moment';
 import Form from '.';
+import { act } from 'react-dom/test-utils';
 
 const date = moment();
 const reminder = { date, day: date.format('D'), time: date.format('HH:mm') };
+const fields = {
+  text: 'Text',
+  day: 'Day',
+  time: 'Time',
+  city: 'City',
+  color: 'Pick a color',
+};
 
 describe('Add new reminder form', () => {
-  it('submits values', async () => {
-    const mock = jest.fn();
-    const getById = queryByAttribute.bind(null, 'id');
-    const dom = render(<Form reminder={reminder} onSubmit={mock} />);
+  const mock = jest.fn();
+  const { getByLabelText, getByText, findByTestId } = render(
+    <Form reminder={reminder} onSubmit={mock} />
+  );
 
-    const text = getById(dom.container, 'text');
-    const day = getById(dom.container, 'day');
-    const time = getById(dom.container, 'time');
-    const city = getById(dom.container, 'city');
-    const color = getById(dom.container, 'color');
+  const text = getByLabelText(fields.text);
+  const time = getByLabelText(fields.time);
+  const city = getByLabelText(fields.city);
 
-    const button = await waitForElement(() => dom.getByText('Save'));
+  const button = getByText('Save');
 
-    fireEvent.change(text, {
-      target: {
-        value: 'Test Test Test Test Test Test Test',
-      },
-    });
-    fireEvent.change(day, {
-      target: {
-        value: 30,
-      },
-    });
-    fireEvent.change(time, {
-      target: {
-        value: moment().toDate(),
-      },
-    });
-    fireEvent.change(city, {
-      target: {
-        value: 'City',
-      },
-    });
-    fireEvent.change(color, {
-      target: {
-        value: '#000',
-      },
+  it('submits values with text greater than 30 characters', async () => {
+    act(() => {
+      fireEvent.change(text, {
+        target: {
+          value: 'Test Test Test Test Test Test Test',
+        },
+      });
     });
 
-    fireEvent.click(button);
+    const validationErrors = await findByTestId('errors-max');
 
-    await wait(() => {
-      expect(mock).toBeCalled();
-    });
+    expect(validationErrors.innerHTML).toBe('Max 30 characters.');
   });
 });
